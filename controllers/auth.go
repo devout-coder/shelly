@@ -13,14 +13,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 )
-
-var userCollection *mongo.Collection
-
-func InitCollections() {
-	userCollection = config.DB.Collection("users")
-}
 
 func handleValidationError(context *gin.Context, err error) bool {
 	if errs, ok := err.(validator.ValidationErrors); ok {
@@ -49,7 +42,7 @@ func Signup(context *gin.Context) {
 	}
 
 	var existingUser models.User
-	err := userCollection.FindOne(context, bson.M{"email": user.Email}).Decode(&existingUser)
+	err := config.UserCollection.FindOne(context, bson.M{"email": user.Email}).Decode(&existingUser)
 	if err == nil {
 		context.JSON(http.StatusBadRequest, gin.H{"error": "User already exists"})
 		return
@@ -60,7 +53,7 @@ func Signup(context *gin.Context) {
 		return
 	}
 
-	result, err := userCollection.InsertOne(context, user)
+	result, err := config.UserCollection.InsertOne(context, user)
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": "Could not create user"})
 		return
@@ -97,7 +90,7 @@ func Login(context *gin.Context) {
 		return
 	}
 
-	err := userCollection.FindOne(context, bson.M{"email": user.Email}).Decode(&foundUser)
+	err := config.UserCollection.FindOne(context, bson.M{"email": user.Email}).Decode(&foundUser)
 	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"error": "User not found"})
 		return

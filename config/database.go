@@ -12,6 +12,14 @@ import (
 
 var DB *mongo.Database
 
+var UserCollection *mongo.Collection
+var ShellCollection *mongo.Collection
+
+func InitCollections() {
+	UserCollection = DB.Collection("users")
+	ShellCollection = DB.Collection("shells")
+}
+
 func ConnectDB() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()

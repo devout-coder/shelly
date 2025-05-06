@@ -18,7 +18,11 @@ func main() {
 
 	config.ConnectDB()
 
-	controllers.InitCollections()
+	config.InitCollections()
+
+	if err := controllers.InitKubernetesClient(); err != nil {
+		log.Fatal("Failed to initialize Kubernetes client:", err)
+	}
 
 	r := gin.Default()
 
@@ -28,11 +32,12 @@ func main() {
 		})
 	})
 
-	routes.AuthRoutes(r)
+	routes.SetupAuthRoutes(r)
+	routes.SetupShellRoutes(r)
 
-	if err := r.Run(":8080"); err != nil {
+	if err := r.Run(":8000"); err != nil {
 		log.Fatal("Failed to start server:", err)
 	} else {
-		log.Println("Server started on port 8080")
+		log.Println("Server started on port 8000")
 	}
 }
